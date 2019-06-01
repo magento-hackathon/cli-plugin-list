@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Diglin GmbH - Switzerland
+ *
+ * @author      Sylvain Rayé <support at diglin.com>
+ * @category    Diglin
+ * @package     MagentoHackathon_CliPluginList
+ * @copyright   Copyright (c) 2011-2017 Diglin (http://www.diglin.com)
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="pluginListCommand" xsi:type="object">MagentoHackathon\CliPluginList\Console\Command\PluginListCommand</item>
+            </argument>
+        </arguments>
+    </type>
+</config>
