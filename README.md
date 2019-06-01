@@ -18,6 +18,8 @@ Get a good overview of plugins installed and be aware about their influence on y
 You can replace the area `frontend` with `adminhtml`, `webapi_rest`, `webapi_soap`.
 By default, `global` is used. In any case, global plugins are always displayed.
 
+![preview](./doc/preview.png)
+
 # License
 
 OSL v3.0
