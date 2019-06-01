@@ -69,7 +69,8 @@ class PluginListCommand extends Command
         $start = microtime(true);
 
         $style = new MagentoStyle($input, $output);
-        $style->writeln('<info>Generating list of plugins...</info>');
+        $style->writeln('<info>Generating list of plugins for the area ' . $input->getArgument('area') . '...</info>');
+        $style->writeln('');
 
         $classes = $this->getClasses($input, $style);
 

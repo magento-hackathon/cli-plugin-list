@@ -4,12 +4,20 @@ Get a good overview of plugins installed and be aware about their influence on y
 
 # Features list
 - Get the list of plugins registered
-- Split overview between global, frontend, adminhtml, webapi_rest, webapi_soap
-- Plugin types (before, after, around) and nesting
+- Get a list per area: global, frontend, adminhtml, webapi_rest, webapi_soap
+- Detect easily in which way a plugin interfere with a method (before, after, around) and nesting
 
 # Installation
 
-`composer require ...`
+`composer require --dev magentohackathon/clipluginlist`
+
+# Usage
+
+`bin/magento hackathon:plugin:list frontend`
+
+You can replace `frontend`, `adminhtml`, `webapi_rest`, `webapi_soap`.
+By default, `global` is used. In any case, global plugins are always displayed.
+By default, `global` is used. In any case, global plugins are always displayed.
 
 # License
 
@@ -17,5 +25,5 @@ OSL v3.0
 
 # Author
 
-Torben Höhn
-Sylvain Rayé
+- Torben Höhn
+- Sylvain Rayé
