@@ -13,6 +13,7 @@ use Magento\Developer\Model\Di\PluginList;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Config\ScopeInterface;
 use Magento\Framework\Console\Cli;
+use Magento\Framework\Module\Manager;
 use Magento\Setup\Console\Style\MagentoStyle;
 use ReflectionClass;
 use ReflectionException;
@@ -34,16 +35,24 @@ class PluginListCommand extends Command
     private $scope;
 
     /**
+     * @var Manager
+     */
+    private $moduleManager;
+
+    /**
      * PluginListCommand constructor.
      *
      * @param ScopeInterface $scope
-     * @param string|null $name
+     * @param Manager        $moduleManager
+     * @param string|null    $name
      */
     public function __construct(
         ScopeInterface $scope,
+        Manager $moduleManager,
         ?string $name = null
     ) {
         $this->scope = $scope;
+        $this->moduleManager = $moduleManager;
         parent::__construct($name);
     }
 
@@ -192,7 +201,17 @@ class PluginListCommand extends Command
         ksort($data);
 
         if ($input->getOption('module')) {
-            $module = str_replace('_', '\\', $input->getOption('module'));
+            $module = $input->getOption('module');
+
+            if (false === $this->moduleManager->isEnabled($module)) {
+                $style->error(
+                    sprintf('Module "%s" does not exist. Install the module or check your spelling.', $module)
+                );
+
+                return null;
+            }
+
+            $module = str_replace('_', '\\', $module);
 
             foreach ($data as $key => $value) {
                 if (substr($key, 0, strlen($module)) !== $module) {
