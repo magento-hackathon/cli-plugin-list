@@ -40,11 +40,21 @@ class PluginListCommand extends Command
     private $moduleManager;
 
     /**
+     * @var array
+     */
+    private $allowedAreas = [
+        AREA::AREA_GLOBAL,
+        AREA::AREA_ADMINHTML,
+        AREA::AREA_FRONTEND,
+        AREA::AREA_WEBAPI_REST,
+        AREA::AREA_WEBAPI_SOAP
+    ];
+
+    /**
      * PluginListCommand constructor.
      *
      * @param ScopeInterface $scope
-     * @param Manager        $moduleManager
-     * @param string|null    $name
+     * @param string|null $name
      */
     public function __construct(
         ScopeInterface $scope,
@@ -91,6 +101,12 @@ class PluginListCommand extends Command
         $start = microtime(true);
 
         $style = new MagentoStyle($input, $output);
+
+        if (!\in_array($input->getArgument('area'), $this->allowedAreas, true)) {
+            $style->error('Area "' . $input->getArgument('area') . '" does not exist.');
+            return Cli::RETURN_FAILURE;
+        }
+
         $style->writeln('<info>Generating list of plugins for the area ' . $input->getArgument('area') . '...</info>');
         $style->writeln('');
 
