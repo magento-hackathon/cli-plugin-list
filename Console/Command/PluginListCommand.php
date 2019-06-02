@@ -14,16 +14,19 @@ use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Config\ScopeInterface;
 use Magento\Framework\Console\Cli;
 use Magento\Setup\Console\Style\MagentoStyle;
+use ReflectionClass;
+use ReflectionException;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Magento\Framework\App\Area;
 
+/**
+ * Class PluginListCommand
+ */
 class PluginListCommand extends Command
 {
-    const AREA_GLOBAL = 'global';
-
     /**
      * @var ScopeInterface
      */
@@ -40,10 +43,12 @@ class PluginListCommand extends Command
         ?string $name = null
     ) {
         $this->scope = $scope;
-
         parent::__construct($name);
     }
 
+    /**
+     * @inheritDoc
+     */
     public function configure()
     {
         $this->setName('hackathon:plugin:list');
@@ -51,8 +56,9 @@ class PluginListCommand extends Command
         $this->addArgument(
             'area',
             InputArgument::OPTIONAL,
-            'Specify the area to lookup. All non global area will include global plugins. Value examples: global, frontend, adminhtml, webapi_rest, webapi_soap',
-            self::AREA_GLOBAL
+            'Specify the area to lookup. All non global area will include global plugins.
+            Value examples: global, frontend, adminhtml, webapi_rest, webapi_soap',
+            Area::AREA_GLOBAL
         );
     }
 
@@ -61,9 +67,9 @@ class PluginListCommand extends Command
      * @param OutputInterface $output
      *
      * @return int|null
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output) : ?int
     {
         $totalFound = 0;
         $start = microtime(true);
@@ -85,7 +91,6 @@ class PluginListCommand extends Command
             $pluginInfos = $pluginListDev->getPluginsListByClass($value);
 
             foreach ($pluginInfos as $placement => $pluginInfo) {
-
                 if (empty($pluginInfo)) {
                     continue;
                 }
@@ -105,18 +110,18 @@ class PluginListCommand extends Command
             foreach ($pluginsClasses as $pluginClass) {
                 $rows[] = [
                     $pluginClass,
-                    $result[$pluginClass]['before'] ?? '--',
-                    $result[$pluginClass]['around'] ?? '--',
-                    $result[$pluginClass]['after'] ?? '--',
+                    $result[$pluginClass][PluginList::PLUGIN_TYPE_BEFORE] ?? '--',
+                    $result[$pluginClass][PluginList::PLUGIN_TYPE_AROUND] ?? '--',
+                    $result[$pluginClass][PluginList::PLUGIN_TYPE_AFTER] ?? '--'
                 ];
             }
 
             $style->table(
                 [
                     $value,
-                    'before',
-                    'around',
-                    'after',
+                    PluginList::PLUGIN_TYPE_BEFORE,
+                    PluginList::PLUGIN_TYPE_AROUND,
+                    PluginList::PLUGIN_TYPE_AFTER
                 ],
                 $rows
             );
@@ -134,18 +139,19 @@ class PluginListCommand extends Command
 
     /**
      * @param InputInterface $input
+     * @param MagentoStyle   $style
      *
      * @return null|array
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    protected function getClasses(InputInterface $input, MagentoStyle $style): ?array
+    private function getClasses(InputInterface $input, MagentoStyle $style): ?array
     {
         /** @var \Magento\Developer\Model\Di\PluginList $pluginListDev */
         $pluginListDev = ObjectManager::getInstance()->get(PluginList::class);
 
         try {
-            $reflector = new \ReflectionClass($pluginListDev);
-        } catch (\ReflectionException $e) {
+            $reflector = new ReflectionClass($pluginListDev);
+        } catch (ReflectionException $e) {
             $style->error($e->getMessage());
 
             return null;
