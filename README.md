@@ -5,7 +5,8 @@ Get a good overview of plugins installed and be aware about their influence on y
 # Features list
 - Get the list of plugins registered
 - Get a list per area: global, frontend, adminhtml, webapi_rest, webapi_soap
-- Detect easily in which way a plugin interfere with a method (before, after, around) and nesting
+- Get a list per module
+- Detect easily in which way a plugin interfere with a method (before, around, after)
 
 # Installation
 
@@ -18,6 +19,8 @@ Get a good overview of plugins installed and be aware about their influence on y
 You can replace the area `frontend` with `adminhtml`, `webapi_rest`, `webapi_soap`.
 By default, `global` is used. In any case, global plugins are always displayed.
 
+By adding the option `-m, --module[=MODULE]` you can filter the results for one module only.
+
 ![preview](./doc/preview.png)
 
 # License
@@ -28,3 +31,4 @@ OSL v3.0
 
 - Torben Höhn
 - Sylvain Rayé
+- Matthias Hamacher

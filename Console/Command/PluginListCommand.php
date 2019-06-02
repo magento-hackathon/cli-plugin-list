@@ -19,6 +19,7 @@ use ReflectionException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Magento\Framework\App\Area;
 
@@ -60,6 +61,12 @@ class PluginListCommand extends Command
             Value examples: global, frontend, adminhtml, webapi_rest, webapi_soap',
             Area::AREA_GLOBAL
         );
+        $this->addOption(
+            'module',
+            'm',
+            InputOption::VALUE_OPTIONAL,
+            'Specify a module to lookup. Only plugins of the specified module will be shown'
+        );
     }
 
     /**
@@ -97,7 +104,7 @@ class PluginListCommand extends Command
 
                 foreach ($pluginInfo as $pluginClass => $methods) {
                     $totalFound += count($methods);
-                    $result[$pluginClass][$placement] = implode(PHP_EOL, $methods);
+                    $result[$pluginClass][$placement] = $methods;
                 }
             }
 
@@ -105,15 +112,31 @@ class PluginListCommand extends Command
                 continue;
             }
 
-            $pluginsClasses = array_keys($result);
-
-            foreach ($pluginsClasses as $pluginClass) {
-                $rows[] = [
-                    $pluginClass,
-                    $result[$pluginClass][PluginList::PLUGIN_TYPE_BEFORE] ?? '--',
-                    $result[$pluginClass][PluginList::PLUGIN_TYPE_AROUND] ?? '--',
-                    $result[$pluginClass][PluginList::PLUGIN_TYPE_AFTER] ?? '--'
-                ];
+            foreach ($result as $pluginClass => $plugins) {
+                $first = true;
+                $count = max(
+                    count($plugins[PluginList::PLUGIN_TYPE_BEFORE] ?? []),
+                    count($plugins[PluginList::PLUGIN_TYPE_AROUND] ?? []),
+                    count($plugins[PluginList::PLUGIN_TYPE_AFTER] ?? [])
+                );
+                for ($i = 0; $i < $count; $i++) {
+                    if ($first === true) {
+                        $rows[] = [
+                            $pluginClass,
+                            $plugins[PluginList::PLUGIN_TYPE_BEFORE][$i] ?? '--',
+                            $plugins[PluginList::PLUGIN_TYPE_AROUND][$i] ?? '--',
+                            $plugins[PluginList::PLUGIN_TYPE_AFTER][$i] ?? '--',
+                        ];
+                        $first = false;
+                    } else {
+                        $rows[] = [
+                            '',
+                            $plugins[PluginList::PLUGIN_TYPE_BEFORE][$i] ?? '--',
+                            $plugins[PluginList::PLUGIN_TYPE_AROUND][$i] ?? '--',
+                            $plugins[PluginList::PLUGIN_TYPE_AFTER][$i] ?? '--',
+                        ];
+                    }
+                }
             }
 
             $style->table(
@@ -146,7 +169,7 @@ class PluginListCommand extends Command
      */
     private function getClasses(InputInterface $input, MagentoStyle $style): ?array
     {
-        /** @var \Magento\Developer\Model\Di\PluginList $pluginListDev */
+        /** @var PluginList $pluginListDev */
         $pluginListDev = ObjectManager::getInstance()->get(PluginList::class);
 
         try {
@@ -167,6 +190,16 @@ class PluginListCommand extends Command
         $property->setAccessible(true);
         $data = $property->getValue($pluginListDev);
         ksort($data);
+
+        if ($input->getOption('module')) {
+            $module = str_replace('_', '\\', $input->getOption('module'));
+
+            foreach ($data as $key => $value) {
+                if (substr($key, 0, strlen($module)) !== $module) {
+                    unset($data[$key]);
+                }
+            }
+        }
 
         return array_keys($data);
     }
