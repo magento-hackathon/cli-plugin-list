@@ -12,6 +12,10 @@ Get a good overview of plugins installed and be aware about their influence on y
 
 `composer require --dev magentohackathon/clipluginlist`
 
+Next, enable the extension
+
+`bin/magento module:enable MagentoHackathon_CliPluginList`
+
 # Usage
 
 `bin/magento hackathon:plugin:list frontend`
